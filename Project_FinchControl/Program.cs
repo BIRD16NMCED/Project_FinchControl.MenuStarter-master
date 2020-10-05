@@ -12,9 +12,9 @@ namespace Project_FinchControl
     // Description: Starter solution with the helper methods,
     //              opening and closing screens, and the menu
     // Application Type: Console
-    // Author: Velis, John
+    // Author: Spencer Bird (framework by John Velis)
     // Dated Created: 1/22/2020
-    // Last Modified: 9/28/2020
+    // Last Modified: 10/4/2020
     //
     // **************************************************
 
@@ -87,15 +87,15 @@ namespace Project_FinchControl
                         break;
 
                     case "c":
-
-                        break;
+                        DisplayDataRecorderMenuScreen(finchRobot);
+                         break;
 
                     case "d":
-
+                        DisplayAlarmSystemMenuScreen(finchRobot);
                         break;
 
                     case "e":
-
+                        DisplayUserProgrammingMenuScreen(finchRobot);
                         break;
 
                     case "f":
@@ -140,8 +140,8 @@ namespace Project_FinchControl
                 //
                 Console.WriteLine("\ta) Light and Sound");
                 Console.WriteLine("\tb) Do a Dance");
-                Console.WriteLine("\tc) ");
-                Console.WriteLine("\td) ");
+                Console.WriteLine("\tc) Rave Party");
+                Console.WriteLine("\td) Simple Song");
                 Console.WriteLine("\tq) Main Menu");
                 Console.Write("\t\tEnter Choice:");
                 menuChoice = Console.ReadLine().ToLower();
@@ -160,11 +160,11 @@ namespace Project_FinchControl
                         break;
 
                     case "c":
-
+                        DisplayRaveParty(myFinch); 
                         break;
 
                     case "d":
-
+                        DisplayQuickSong(myFinch);
                         break;
 
                     case "q":
@@ -186,12 +186,12 @@ namespace Project_FinchControl
             Console.WriteLine("\tThe Finch robot will now do a dance!");
             DisplayContinuePrompt();
 
-            for (int i = 0; i < 5; i++) //makes the finch waddle when selected 
+            for (int i = 0; i < 10; i++) //makes the finch waddle when selected 
             {
                 myFinch.setMotors(255, 128);
-                myFinch.wait(1000);
-                myFinch.setMotors(128, 255);
-                myFinch.wait(1000);
+                myFinch.wait(250);
+                myFinch.setMotors(-128, -255);
+                myFinch.wait(250);
                 myFinch.setMotors(0, 0); //stops the motors on the finch 
             }
 
@@ -212,18 +212,84 @@ namespace Project_FinchControl
 
             DisplayScreenHeader("Light and Sound");
 
-            Console.WriteLine("\tThe Finch robot will not show off its glowing talent!");
+            Console.WriteLine("\tThe Finch robot will glow up and resonate a tune!");
             DisplayContinuePrompt();
 
-            for (int lightSoundLevel = 0; lightSoundLevel < 255; lightSoundLevel++)
+            for (int lightSoundLevel = 0; lightSoundLevel < 69; lightSoundLevel++)
             {
                 finchRobot.setLED(lightSoundLevel, lightSoundLevel, lightSoundLevel);
-                finchRobot.noteOn(lightSoundLevel * 100);
+                finchRobot.noteOn(lightSoundLevel * 523);
+                finchRobot.setLED(0, 0, 0);
+                finchRobot.noteOff();
             }
 
             DisplayMenuPrompt("Talent Show Menu");
         }
 
+
+        /// <summary>
+        /// *****************************************************************
+        /// *               Talent Show Rave Dance                          *
+        /// *****************************************************************
+        /// </summary>
+        /// <param name="finchRobot">finch robot object</param>
+        static void DisplayRaveParty(Finch finchRobot)
+        {
+            Console.CursorVisible = false;
+
+            DisplayScreenHeader("Rave Party");
+
+            Console.WriteLine("\t the finch robot will light up and dance while firing off some notes.");
+            DisplayContinuePrompt();
+
+            for (int RaveDance = 0; RaveDance < 15; RaveDance++)
+            {
+                finchRobot.setLED(RaveDance, RaveDance, RaveDance);
+                finchRobot.noteOn(RaveDance * 587);
+                finchRobot.setMotors(128, 255);
+                finchRobot.wait(125);
+                finchRobot.setMotors(128, 255);
+                finchRobot.wait(125);
+                finchRobot.setLED(0, 0, 0);
+                finchRobot.noteOff();
+                finchRobot.setMotors(0, 0);
+                
+            }
+            DisplayMenuPrompt("Talent Show Menu");
+        }
+
+        /// <summary>
+        /// *****************************************************************
+        /// *               Talent Show Rave Dance                          *
+        /// *****************************************************************
+        /// </summary>
+        /// <param name="finchRobot">finch robot object</param>
+        static void DisplayQuickSong(Finch finchRobot)
+        {
+            Console.CursorVisible = false;
+
+            DisplayScreenHeader("Quick Song");
+
+            Console.WriteLine("\t The finch will play a quick jingle for your ears.");
+            DisplayContinuePrompt();
+
+            for (int QuickJingle = 0; QuickJingle < 12; QuickJingle++)
+            {
+                finchRobot.noteOn(QuickJingle * 523);
+                finchRobot.wait(250);
+                finchRobot.noteOff();
+                finchRobot.noteOn(QuickJingle * 698);
+                finchRobot.wait(250);
+                finchRobot.noteOff();
+
+            }
+            DisplayMenuPrompt("Finch Talent Show");
+        }   
+
+
+        
+            
+        
         #endregion
 
         #region FINCH ROBOT MANAGEMENT
@@ -353,5 +419,54 @@ namespace Project_FinchControl
         }
 
         #endregion
+
+
+        #region FINCH RECORDING
+        /// <summary>
+        /// *****************************************************************
+        /// *                  Data Recorder for Finch                      *
+        /// *****************************************************************
+        /// </summary>
+        /// <param name="finchRobot">finch robot object</param>
+        /// <returns>notify if the robot is connected</returns>
+        static void DisplayDataRecorderMenuScreen(Finch FinchRobot)
+        {
+            DisplayScreenHeader("Data Recorder");
+            Console.WriteLine("This Module is under Development.");
+            Console.WriteLine();
+            DisplayContinuePrompt();
+        }
+
+        /// <summary>
+        /// *****************************************************************
+        /// *                  Alarm System for Finch                       *
+        /// *****************************************************************
+        /// </summary>
+        /// <param name="finchRobot">finch robot object</param>
+        /// <returns>notify if the robot is connected</returns>
+        static void DisplayAlarmSystemMenuScreen(Finch FinchRobot)
+        {
+            DisplayScreenHeader("Alarm System");
+            Console.WriteLine("This Module is under Development.");
+            Console.WriteLine();
+            DisplayContinuePrompt();
+        }
+
+        /// <summary>
+        /// *****************************************************************
+        /// *                  User Programming for Finch                   *
+        /// *****************************************************************
+        /// </summary>
+        /// <param name="finchRobot">finch robot object</param>
+        /// <returns>notify if the robot is connected</returns>
+        static void DisplayUserProgrammingMenuScreen(Finch FinchRobot)
+        {
+            DisplayScreenHeader("User Programming");
+            Console.WriteLine("This Module is under Development.");
+            Console.WriteLine();
+            DisplayContinuePrompt();
+        }
     }
+
+        #endregion
 }

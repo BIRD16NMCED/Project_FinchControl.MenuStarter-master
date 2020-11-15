@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 using System.Runtime.Remoting.Messaging;
 using FinchAPI;
@@ -48,7 +51,7 @@ namespace Project_FinchControl
         static void Main(string[] args)
         {
             SetTheme();
-
+            DataDisplaySetTheme();
             DisplayWelcomeScreen();
             DisplayMenuScreen();
             DisplayClosingScreen();
@@ -89,7 +92,9 @@ namespace Project_FinchControl
                 Console.WriteLine("\tc) Data Recorder");
                 Console.WriteLine("\td) Alarm System");
                 Console.WriteLine("\te) User Programming");
-                Console.WriteLine("\tf) Disconnect Finch Robot");
+                Console.WriteLine("\tf) Change Color Theme");
+                Console.WriteLine("\tg) Username and Password");
+                Console.WriteLine("\th) Disconnect Finch Robot");
                 Console.WriteLine("\tq) Quit");
                 Console.Write("\t\tEnter Choice:");
                 menuChoice = Console.ReadLine().ToLower();
@@ -120,6 +125,14 @@ namespace Project_FinchControl
                         break;
 
                     case "f":
+                        DisplayChangeThemeMenu();
+                        break;
+
+                    case "g":
+                        DiplsayUserNamePasswordMenu();
+                        break;
+
+                    case "h":
                         DisplayDisconnectFinchRobot(finchRobot);
                         break;
 
@@ -372,6 +385,7 @@ namespace Project_FinchControl
 
             return frequencyOfDataPoints;
         }
+        #endregion
 
         #region ALARM SYSTEM
         /// <summary>
@@ -531,7 +545,7 @@ namespace Project_FinchControl
             // want this for exceeded threshold 
        
 
-    static bool AlarmSystemThresholdExceeded(Finch finchRobot, string sensorToMonitor, string rangeType, int minMaxThresholdValue)
+        static bool AlarmSystemThresholdExceeded(Finch finchRobot, string sensorToMonitor, string rangeType, int minMaxThresholdValue)
         {
             // becomes simpler because we moved logic from above if statement to below for checking
             //
@@ -725,7 +739,7 @@ namespace Project_FinchControl
         //}
         #endregion
 
-
+        #region USER PROGRAMMING
         /// <summary>
         /// *****************************************************************
         /// *                  User Programming for Finch                   *
@@ -956,6 +970,281 @@ namespace Project_FinchControl
             return commandParameters;
         }
 
+
+        #endregion
+
+        #region FILEIO
+        static void DisplayChangeThemeMenu()
+        {
+            bool quitMenu = false;
+            string menuChoice;
+            do
+            {
+                DisplayScreenHeader("\t\tChange Theme Color");
+
+                //
+                // get user menu choice
+                //
+                Console.WriteLine("\ta) Change Theme");
+                Console.WriteLine("\tq) Quit");
+                Console.Write("\t\tEnter Choice:");
+                menuChoice = Console.ReadLine().ToLower();
+
+                switch (menuChoice)
+                {
+                    case "a":
+                        DataDisplaySetTheme();
+                        break;
+                    
+                    case "q":
+                        quitMenu = true;
+                        break;
+
+                    default:
+                        Console.WriteLine();
+                        Console.WriteLine("\tPlease enter a letter for the menu choice.");
+                        DisplayContinuePrompt();
+                        break;
+                }
+            
+            } while (!quitMenu);
+
+        }   
+        /// <summary>
+        /// *****************************************************************
+        /// *                FileIO File Reading for Theme                  *
+        /// *****************************************************************
+        /// </summary>
+        static(ConsoleColor foregroundColor, ConsoleColor backgroundColor) ReadThemeData() 
+        {
+            string dataPath = @"DataFolder/ColorFile.txt";
+            string[] themeColors;
+
+            ConsoleColor foregroundColor;
+            ConsoleColor backgroundColor;
+
+            themeColors = File.ReadAllLines(dataPath);
+
+            Enum.TryParse(themeColors[0], true, out foregroundColor);
+            Enum.TryParse(themeColors[1], true, out backgroundColor);
+
+            return (foregroundColor, backgroundColor);
+
+        }
+
+       
+        
+        /// <summary>
+        /// *****************************************************************
+        /// *               FileIO Write Theme Data to File                 *
+        /// *****************************************************************
+        /// </summary>
+        static void WriteThemeData(ConsoleColor foreground, ConsoleColor background)
+        {
+            string dataPath = @"DataFolder/ColorFile.txt";
+
+            File.WriteAllText(dataPath, foreground.ToString() + "\n");
+            File.AppendAllText(dataPath, background.ToString());
+        }
+        
+        
+        
+        /// <summary>
+        /// *****************************************************************
+        /// *                    Enter ConsoleColor Input                   *
+        /// *****************************************************************
+        /// </summary>
+        static ConsoleColor GetConsoleColorFromUser(string property)
+        {
+            ConsoleColor consoleColor;
+            bool validConsoleColor;
+
+            do
+            {
+                Console.Write($"\tEnter a value for the {property}:");
+                validConsoleColor = Enum.TryParse<ConsoleColor>(Console.ReadLine(), true, out consoleColor);
+
+                if (!validConsoleColor)
+                {
+                    Console.WriteLine("\n\t***** It appears you did not provide a valid console color. Please try again *****\n");
+                }
+                else
+                {
+                    validConsoleColor = true;
+                }
+            } while (!validConsoleColor);
+
+            return consoleColor;
+        }
+
+
+        /// <summary>
+        /// *****************************************************************
+        /// *                    Set and Display FileIO                     *
+        /// ***************************************************************** 
+        /// </summary>
+        static void DataDisplaySetTheme()
+        {
+            (ConsoleColor foregroundColor, ConsoleColor backgroundColor) themeColors;
+            bool themeChosen = false;
+
+            //
+            // Set current theme from data
+            //
+            themeColors = ReadThemeData();
+            Console.ForegroundColor = themeColors.foregroundColor;
+            Console.BackgroundColor = themeColors.backgroundColor;
+            Console.Clear();
+            DisplayScreenHeader("Set Application Theme");
+
+            Console.WriteLine($"\tCurrent foreground color: {Console.ForegroundColor}");
+            Console.WriteLine($"\tCurrent background color: {Console.BackgroundColor}");
+            Console.WriteLine();
+            
+
+            Console.Write("\tWould you like to change the current theme [ yes | no ]?");
+            if (Console.ReadLine().ToLower() == "yes")
+            {
+                do
+                {
+                    themeColors.foregroundColor = GetConsoleColorFromUser("foreground");
+                    themeColors.backgroundColor = GetConsoleColorFromUser("background");
+                    
+                    //
+                    // Set New Theme
+                    //
+                    Console.ForegroundColor = themeColors.foregroundColor;
+                    Console.BackgroundColor = themeColors.backgroundColor;
+                    Console.Clear();
+                    DisplayScreenHeader("Set Application Theme");
+                    Console.WriteLine($"\tNew Foreground Color: {Console.ForegroundColor}");
+                    Console.WriteLine($"\tNew Background Color: {Console.BackgroundColor}");
+
+                    Console.WriteLine();
+                    Console.WriteLine("\tIs this the theme you would like? [ yes | no ]");
+                    if (Console.ReadLine().ToLower() == "yes")
+                    {
+                        themeChosen = true;
+                        WriteThemeData(themeColors.foregroundColor, themeColors.backgroundColor);
+                    }
+                } while (!themeChosen);
+            }
+            DisplayContinuePrompt();
+        }
+        #endregion
+        #region USER PASSWORD AND USERNAME
+         static void DiplsayUserNamePasswordMenu()
+         {
+            bool quitMenu = false;
+            string menuChoice;
+
+            do
+            {
+                DisplayScreenHeader("Username & Password File Menu");
+                //
+                // User Menu Choice Files
+                //
+                Console.WriteLine("\ta) Read & Write Single Username");
+                Console.WriteLine("\tb) Read and Write Single Password");
+                Console.WriteLine("\tc) Login Validation of Username & Password");
+                Console.WriteLine("\tq) Quit Username & Password Menu");
+                Console.Write("\t\tEnter Choice:");
+                menuChoice = Console.ReadLine().ToLower();
+                switch (menuChoice)
+                {
+                    case "a":
+                        DisplayNewUsername();
+                        break;
+                    case "b":
+                        DisplayNewPassword();
+                        break;
+                    case "c":
+                        LoginRegister();
+                        break;
+                    case "q":
+                        quitMenu = true;
+                        break;
+
+                    default:
+                        Console.WriteLine();
+                        Console.WriteLine("\tPlease enter a letter for the menu choice.");
+                        DisplayContinuePrompt();
+                        break;
+                }
+
+            } while (!quitMenu);
+         }
+            //
+            // Read UserNamePassword File
+            //
+            static void WriteUsernameToDataFile()
+            {
+                string dataPath = @"DataFolder\UserNamePassword.txt";
+                string usernameText;
+                Console.Clear();
+
+
+            }
+            static void DisplayNewUsername()
+            {
+                Console.Clear();
+                Console.WriteLine("Enter a Username: ");
+                string usernameText = Console.ReadLine();
+                File.AppendAllText(@"DataFolder\UserNamePassword.txt", usernameText + "\n");
+                Console.WriteLine($"New Username {usernameText}");
+                DisplayContinuePrompt();
+            }
+            static void DisplayNewPassword()
+            {
+                bool correctLogin = false;
+                Console.Clear();
+                Console.WriteLine("Enter a Password: ");
+                string passwordText = Console.ReadLine();
+                File.AppendAllText(@"DataFolder\UserNamePassword.txt", passwordText + "\n");
+                DisplayContinuePrompt();
+            }
+            static void LoginRegister()
+            {
+                bool correctLogin = false; 
+                
+                Console.WriteLine("Are you an existing user? [yes / no]"); //validate do/while loop for username and password inside if statement for yes 
+                string LoginInput = Console.ReadLine();
+                if (LoginInput == "yes")
+                {
+                    do
+                    {
+                        
+                        Console.WriteLine("Please enter your Username.");
+
+                        string userName = Console.ReadLine();
+
+                        Console.WriteLine("Please enter your password.");
+
+                        string passWord = Console.ReadLine();
+
+                        string[] userNamePasswordValidation = File.ReadAllLines(@"DataFolder\UserNamePassword.txt");
+
+                        if (userName == userNamePasswordValidation[0] && passWord == userNamePasswordValidation[1]) //process used for validation of lines 
+                        {
+                            correctLogin = true; 
+                            Console.WriteLine("Username & Password Correct, you may continue.");
+                            DisplayContinuePrompt();
+
+                        }
+                        else
+                        {
+                            correctLogin = false; 
+                            Console.WriteLine("The UserName and Password that you entered does not match the credentials needed, please try re-entering you Username & Password");
+                            DisplayContinuePrompt();
+                        }
+
+                    } while (!correctLogin);
+
+                }
+            }
+
+
+        // INCOMPLETE COULD NOT IMPLEMENT USERNAME PASSWORD PROPERLY WILL TRY TO CONTINUE PROGRESS SOON 
 
         #endregion
 
@@ -1267,6 +1556,6 @@ namespace Project_FinchControl
 
 
 
-    }
-}
+        }
 
+    }
